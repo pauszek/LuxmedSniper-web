@@ -1,0 +1,17 @@
+{% if fd_error %}
+<p class="hint">{{ fd_error }}</p>
+{% else %}
+<label for="clinic_ids">Placówki (puste = wszystkie, ⌘/Ctrl — wielokrotny wybór)</label>
+<select id="clinic_ids" name="clinic_ids" multiple>
+  {% for f in facilities %}
+  <option value="{{ f.id }}" {% if f.id in selected_clinics %}selected{% endif %}>{{ f.name }}</option>
+  {% endfor %}
+</select>
+
+<label for="doctor_ids">Lekarze (puste = wszyscy)</label>
+<select id="doctor_ids" name="doctor_ids" multiple>
+  {% for d in doctors %}
+  <option value="{{ d.id }}" {% if d.id in selected_doctors %}selected{% endif %}>{{ d.name }}</option>
+  {% endfor %}
+</select>
+{% endif %}

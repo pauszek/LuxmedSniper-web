@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LuxmedSniper{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+{% block nav %}
+<nav>
+  <span class="brand">🎯 LuxmedSniper</span>
+  <a href="/">Monitory</a>
+  <a href="/found">Znalezione</a>
+  <a href="/settings">Ustawienia</a>
+  {% if unlocked %}
+  <form method="post" action="/lock" style="margin-left:auto">
+    <button class="small secondary" title="Usuwa klucz z pamięci — scheduler się zatrzyma">🔒 Zablokuj</button>
+  </form>
+  <form method="post" action="/logout" style="margin-left:0">
+  {% else %}
+  <a href="/unlock" style="margin-left:auto">🔓 Odblokuj</a>
+  <form method="post" action="/logout" style="margin-left:0">
+  {% endif %}
+    <button class="small secondary">Wyloguj</button>
+  </form>
+</nav>
+{% endblock %}
+<main>
+  {% if not unlocked %}
+  <div class="banner">
+    🔒 Aplikacja jest <strong>zablokowana</strong> — hasło Luxmed jest zaszyfrowane, a scheduler czeka.
+    <a href="/unlock">Podaj master key</a>, żeby wystartować monitorowanie.
+  </div>
+  {% endif %}
+  {% if msg %}<div class="flash ok">{{ msg }}</div>{% endif %}
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

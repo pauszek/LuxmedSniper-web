@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Monitory — LuxmedSniper{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="statusbar">
+    <span>Scheduler: <strong>{{ "działa" if status.scheduler_running else "zatrzymany" }}</strong></span>
+    <span>Interwał: <strong>{{ status.interval_minutes }} min</strong></span>
+    <span>Zapytania (24 h): <strong>{{ status.requests_last_24h }}/{{ status.daily_limit }}</strong></span>
+    {% if status.paused_until %}
+    <span class="status-error">⏸ Auto-pauza do {{ status.paused_until | localdt }}</span>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>Monitory <a class="btn small" href="/monitors/new" style="float:right">+ Nowy monitor</a></h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Monitor</th>
+          <th>Status</th>
+          <th>Ostatnie sprawdzenie</th>
+          <th>Ostatni znaleziony termin</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="monitor-rows" hx-get="/partials/monitors" hx-trigger="every 30s" hx-swap="innerHTML">
+        {% include "partials/monitor_rows.html" %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% if not monitors %}
+<tr><td colspan="5" class="status-muted">Brak monitorów — dodaj pierwszy przyciskiem „Nowy monitor”.</td></tr>
+{% endif %}
+{% for m in monitors %}
+<tr>
+  <td>
+    <strong>{{ m.name }}</strong>
+    <span class="pill {{ 'on' if m.enabled }}">{{ "włączony" if m.enabled else "wyłączony" }}</span>
+    <div class="sub">
+      {{ m.city_name }} · {{ m.service_name }} · {{ m.lookup_days }} dni
+      {% if m.clinic_names %}<br>Placówki: {{ m.clinic_names | join(", ") }}{% endif %}
+      {% if m.doctor_names %}<br>Lekarze: {{ m.doctor_names | join(", ") }}{% endif %}
+    </div>
+  </td>
+  <td>
+    {% if m.last_status is none %}
+      <span class="status-muted">jeszcze nie sprawdzano</span>
+    {% elif m.last_status.startswith("ok") %}
+      <span class="status-ok">{{ m.last_status }}</span>
+    {% elif m.last_status in ("locked", "paused", "limit") %}
+      <span class="status-muted">{{ m.last_status }}</span>
+      {% if m.last_error %}<div class="sub">{{ m.last_error }}</div>{% endif %}
+    {% elif m.last_status == "sprawdzanie…" %}
+      <span class="status-muted">sprawdzanie…</span>
+    {% else %}
+      <span class="status-error">błąd</span>
+      {% if m.last_error %}<div class="sub">{{ m.last_error }}</div>{% endif %}
+    {% endif %}
+  </td>
+  <td>{{ m.last_check_at | localdt }}</td>
+  <td>
+    {% if m.latest_found %}
+      {{ m.latest_found.appointment_date | localdt }}
+      <div class="sub">{{ m.latest_found.doctor }}</div>
+    {% else %}
+      <span class="status-muted">—</span>
+    {% endif %}
+  </td>
+  <td>
+    <div class="actions">
+      <button class="small secondary"
+              hx-post="/monitors/{{ m.id }}/toggle"
+              hx-target="#monitor-rows" hx-swap="innerHTML">
+        {{ "Wyłącz" if m.enabled else "Włącz" }}
+      </button>
+      <button class="small secondary"
+              hx-post="/monitors/{{ m.id }}/check"
+              hx-target="#monitor-rows" hx-swap="innerHTML"
+              {% if not unlocked %}disabled title="Najpierw odblokuj"{% endif %}>
+        Sprawdź teraz
+      </button>
+      <a class="btn small secondary" href="/monitors/{{ m.id }}/edit">Edytuj</a>
+      <button class="small danger"
+              hx-post="/monitors/{{ m.id }}/delete"
+              hx-confirm="Usunąć monitor „{{ m.name }}” wraz z historią?"
+              hx-target="#monitor-rows" hx-swap="innerHTML">
+        Usuń
+      </button>
+    </div>
+  </td>
+</tr>
+{% endfor %}

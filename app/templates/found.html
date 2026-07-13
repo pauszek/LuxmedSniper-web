@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Znalezione — LuxmedSniper{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Znalezione terminy</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Termin wizyty</th>
+          <th>Lekarz</th>
+          <th>Placówka</th>
+          <th>Monitor</th>
+          <th>Znaleziono</th>
+          <th>Push</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if not found %}
+        <tr><td colspan="6" class="status-muted">Jeszcze nic nie znaleziono.</td></tr>
+        {% endif %}
+        {% for f in found %}
+        <tr>
+          <td><strong>{{ f.appointment_date | localdt }}</strong></td>
+          <td>{{ f.doctor }}</td>
+          <td>{{ f.clinic }}</td>
+          <td>{{ f.monitor_name or "(usunięty)" }}</td>
+          <td>{{ f.found_at | localdt }}</td>
+          <td>{{ "✅" if f.notified else "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Odblokuj — LuxmedSniper{% endblock %}
+{% block content %}
+<div class="card auth-card">
+  <h2>🔓 Odblokowanie</h2>
+  {% if unlocked %}
+  <p>Aplikacja jest już odblokowana — scheduler działa.</p>
+  <a class="btn" href="/">Wróć do monitorów</a>
+  {% else %}
+  <p class="hint">
+    Po restarcie kontenera klucz szyfrujący zniknął z pamięci.
+    Podaj master key, żeby odszyfrować hasło Luxmed i wystartować monitorowanie.
+  </p>
+  <form method="post" action="/unlock">
+    <label for="master_key">Master key</label>
+    <input type="password" id="master_key" name="master_key" required autofocus>
+    <button>Odblokuj</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

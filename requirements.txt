@@ -1,6 +1,15 @@
+# --- legacy CLI (luxmed_sniper.py) ---
 PyYAML==6.0.3
 requests >= 2.32.5
 schedule==1.2.2
 loguru==0.7.3
 jsonschema==4.23.0
 pydantic >= 2.12.5
+
+# --- web app (app/) ---
+fastapi >= 0.115
+uvicorn >= 0.30
+jinja2 >= 3.1
+python-multipart >= 0.0.9
+apscheduler >= 3.10, < 4
+cryptography >= 43

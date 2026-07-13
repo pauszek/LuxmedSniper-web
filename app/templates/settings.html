@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Ustawienia — LuxmedSniper{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>Konto Luxmed</h2>
+  {% if not unlocked %}
+  <p class="hint">🔒 Zapis hasła wymaga odblokowanej aplikacji (hasło jest szyfrowane master key).</p>
+  {% endif %}
+  <form method="post" action="/settings/credentials">
+    <label for="luxmed_login">Login (lub e-mail)</label>
+    <input type="text" id="luxmed_login" name="luxmed_login" required value="{{ luxmed_login }}">
+    <label for="luxmed_password">Hasło {% if has_password %}(zapisane ✅ — wpisz tylko żeby zmienić){% endif %}</label>
+    <input type="password" id="luxmed_password" name="luxmed_password"
+           {% if not has_password %}required{% endif %} autocomplete="new-password">
+    <p class="hint">Hasło trafia do bazy wyłącznie jako szyfrogram Fernet — nigdy plaintextem.</p>
+    <button {% if not unlocked %}disabled{% endif %}>Zapisz dane Luxmed</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Powiadomienia</h2>
+  <form method="post" action="/settings/provider">
+    <label for="provider">Aktywny dostawca</label>
+    <select id="provider" name="provider" onchange="this.form.submit()">
+      <option value="pushover" {% if provider == "pushover" %}selected{% endif %}>Pushover (zalecane)</option>
+      <option value="ntfy" {% if provider == "ntfy" %}selected{% endif %}>ntfy</option>
+    </select>
+    <p class="hint">Powiadomienia idą przez zaznaczonego tu dostawcę. Dane obu możesz mieć zapisane naraz.</p>
+    <noscript><button>Ustaw dostawcę</button></noscript>
+  </form>
+  <div style="margin-top:0.6rem">
+    <button class="secondary" hx-post="/test-notification" hx-target="#test-result" hx-swap="innerHTML">
+      Wyślij testowe powiadomienie ({{ provider }})
+    </button>
+    <span id="test-result"></span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Pushover</h2>
+  <form method="post" action="/settings/pushover">
+    <label for="pushover_user_key">User key</label>
+    <input type="text" id="pushover_user_key" name="pushover_user_key" value="{{ pushover_user_key }}"
+           placeholder="30-znakowy klucz z pushover.net">
+    <label for="pushover_api_token">API token / key {% if has_pushover_token %}(zapisany ✅ — wpisz tylko żeby zmienić){% endif %}</label>
+    <input type="password" id="pushover_api_token" name="pushover_api_token" autocomplete="new-password"
+           placeholder="token aplikacji utworzonej w pushover.net">
+    <p class="hint">
+      Załóż konto na <code>pushover.net</code>, zainstaluj apkę (jednorazowo ~$5 po triallu),
+      skopiuj <strong>User Key</strong> z pulpitu i utwórz aplikację („Create an Application"),
+      by dostać <strong>API Token</strong>. Oba wklej powyżej.
+    </p>
+    <button>Zapisz Pushover</button>
+  </form>
+</div>
+
+<details class="card">
+  <summary style="cursor:pointer;font-weight:600">Powiadomienia ntfy (alternatywa, opcjonalne)</summary>
+  <form method="post" action="/settings/ntfy" style="margin-top:0.8rem">
+    <label for="ntfy_url">URL serwera ntfy</label>
+    <input type="text" id="ntfy_url" name="ntfy_url" required value="{{ ntfy.url }}"
+           placeholder="http://192.168.1.x lub https://ntfy.example.com">
+    <p class="hint">Self-hosted ntfy musi mieć <code>upstream-base-url: "https://ntfy.sh"</code>, inaczej pushe na iOS przychodzą z opóźnieniem.</p>
+    <label for="ntfy_topic">Topic</label>
+    <input type="text" id="ntfy_topic" name="ntfy_topic" required value="{{ ntfy.topic }}"
+           placeholder="np. luxmed-a8f3k2">
+    <label for="ntfy_token">Token (Bearer, jeśli serwer ma auth)</label>
+    <input type="password" id="ntfy_token" name="ntfy_token" value="{{ ntfy.token }}">
+    <label for="ntfy_priority">Domyślny priorytet</label>
+    <select id="ntfy_priority" name="ntfy_priority">
+      {% for p in ["default", "high", "urgent"] %}
+      <option value="{{ p }}" {% if ntfy.priority == p %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+    <button>Zapisz ntfy</button>
+  </form>
+</details>
+
+<div class="card">
+  <h2>Harmonogram i limity</h2>
+  <form method="post" action="/settings/general">
+    <label for="interval">Interwał sprawdzania (minuty, min. 5)</label>
+    <input type="number" id="interval" name="interval" min="5" max="720" value="{{ interval }}">
+    <label for="daily_limit">Dzienny limit zapytań do Luxmedu</label>
+    <input type="number" id="daily_limit" name="daily_limit" min="10" max="2000" value="{{ daily_limit }}">
+    <p class="hint">
+      ⚠️ Luxmed blokuje konta za zbyt częste odpytywanie (1. raz: doba, 2. raz: <strong>bezterminowo</strong>).
+      Dokładny próg nie jest znany — 30 min to bezpieczny default. Możesz zejść do 5 min, ale
+      to Twoje ryzyko. <strong>Faktyczne tempo ogranicza dzienny limit</strong>: jeden monitor co 5 min
+      to ~288 sprawdzeń/dobę, więc przy limicie 200 zatrzyma się po południu. Chcesz realne 5 min —
+      podnieś limit do ~500 (× liczba monitorów).
+    </p>
+    <button>Zapisz</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Hasło GUI</h2>
+  <form method="post" action="/settings/gui-password">
+    <label for="current_password">Obecne hasło</label>
+    <input type="password" id="current_password" name="current_password" required>
+    <label for="new_password">Nowe hasło (min. 8 znaków)</label>
+    <input type="password" id="new_password" name="new_password" required minlength="8">
+    <label for="new_password2">Powtórz nowe hasło</label>
+    <input type="password" id="new_password2" name="new_password2" required minlength="8">
+    <button>Zmień hasło</button>
+  </form>
+</div>
+
+{% endblock %}

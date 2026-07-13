@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Konfiguracja — LuxmedSniper{% endblock %}
+{% block nav %}{% endblock %}
+{% block content %}
+<div class="card auth-card">
+  <h2>Pierwsze uruchomienie</h2>
+  <p class="hint">
+    Hasło GUI chroni dostęp do panelu w sieci lokalnej.
+    Master key szyfruje hasło do Luxmedu — <strong>nie jest nigdzie zapisywany</strong>,
+    po każdym restarcie trzeba go podać ponownie (albo podłączyć plik klucza z hosta Proxmoxa).
+  </p>
+  <form method="post" action="/setup">
+    <label for="gui_password">Hasło GUI (min. 8 znaków)</label>
+    <input type="password" id="gui_password" name="gui_password" required minlength="8" autofocus>
+    <label for="gui_password2">Powtórz hasło GUI</label>
+    <input type="password" id="gui_password2" name="gui_password2" required minlength="8">
+    <label for="master_key">Master key (min. 12 znaków)</label>
+    <input type="password" id="master_key" name="master_key" required minlength="12">
+    <label for="master_key2">Powtórz master key</label>
+    <input type="password" id="master_key2" name="master_key2" required minlength="12">
+    <p class="hint">⚠️ Zgubiony master key = trzeba ponownie wpisać hasło Luxmed. Zapisz go w menedżerze haseł.</p>
+    <button>Zapisz i odblokuj</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edytuj monitor" if monitor else "Nowy monitor" }} — LuxmedSniper{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>{{ "Edytuj monitor" if monitor else "Nowy monitor" }}</h2>
+
+  {% if dict_error %}
+  <div class="banner">
+    Nie udało się pobrać słowników z Luxmedu: {{ dict_error }}<br>
+    Upewnij się, że aplikacja jest <a href="/unlock">odblokowana</a>
+    i że dane logowania Luxmed są zapisane w <a href="/settings">Ustawieniach</a>.
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ '/monitors/' ~ monitor.id if monitor else '/monitors' }}">
+    <label for="name">Nazwa</label>
+    <input type="text" id="name" name="name" required
+           value="{{ monitor.name if monitor else '' }}" placeholder="np. Okulista dla Ali">
+
+    <label for="city_id">Miasto</label>
+    <select id="city_id" name="city_id" required
+            hx-get="/dictionaries/facilities-doctors"
+            hx-include="#service_id{% if monitor %}, #monitor_id{% endif %}"
+            hx-target="#facilities-doctors" hx-swap="innerHTML">
+      <option value="">— wybierz —</option>
+      {% for c in cities %}
+      <option value="{{ c.id }}" {% if monitor and monitor.city_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="service_id">Usługa</label>
+    <select id="service_id" name="service_id" required
+            hx-get="/dictionaries/facilities-doctors"
+            hx-include="#city_id{% if monitor %}, #monitor_id{% endif %}"
+            hx-target="#facilities-doctors" hx-swap="innerHTML">
+      <option value="">— wybierz —</option>
+      {% for s in services %}
+      <option value="{{ s.id }}" {% if monitor and monitor.service_id == s.id %}selected{% endif %}>
+        {{ s.path }}{% if s.telemedicine %} (telemedycyna){% endif %}
+      </option>
+      {% endfor %}
+    </select>
+
+    {% if monitor %}<input type="hidden" id="monitor_id" name="monitor_id" value="{{ monitor.id }}">{% endif %}
+
+    <div id="facilities-doctors"
+         {% if monitor %}
+         hx-get="/dictionaries/facilities-doctors?city_id={{ monitor.city_id }}&service_id={{ monitor.service_id }}&monitor_id={{ monitor.id }}"
+         hx-trigger="load" hx-swap="innerHTML"
+         {% endif %}>
+      <p class="hint">Placówki i lekarze pojawią się po wybraniu miasta i usługi (puste = dowolne).</p>
+    </div>
+
+    <label for="lookup_days">Ile dni do przodu szukać</label>
+    <input type="number" id="lookup_days" name="lookup_days" min="1" max="60"
+           value="{{ monitor.lookup_days if monitor else 14 }}">
+
+    <label>
+      <input type="checkbox" name="enabled" style="width:auto"
+             {% if not monitor or monitor.enabled %}checked{% endif %}>
+      Monitor włączony
+    </label>
+
+    <button>{{ "Zapisz zmiany" if monitor else "Dodaj monitor" }}</button>
+    <a class="btn secondary" href="/">Anuluj</a>
+  </form>
+</div>
+{% endblock %}
