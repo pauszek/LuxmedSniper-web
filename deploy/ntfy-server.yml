@@ -1,0 +1,26 @@
+# /etc/ntfy/server.yml — konfiguracja self-hosted ntfy dla LuxmedSniper.
+#
+# KLUCZOWE dla iOS: upstream-base-url. Apka ntfy na iOS dostaje natywne pushe
+# tylko przez APNs, do którego credentiale ma wyłącznie ntfy.sh. Twój serwer
+# wysyła przez ntfy.sh jedynie sygnał "poll" (bez treści!) — iPhone budzi się
+# i pobiera właściwą wiadomość z TWOJEGO serwera. Bez tej opcji powiadomienia
+# potrafią przyjść po 20 minutach albo kilku godzinach.
+
+base-url: "http://IP-TWOJEGO-LXC"          # zmień na swój adres (lub https://ntfy.twojadomena)
+listen-http: ":80"
+
+upstream-base-url: "https://ntfy.sh"
+
+# Bez auth topic działa jak publiczne hasło — każdy kto zgadnie nazwę może
+# czytać i pisać. Deny-all + dedykowany user, token dla snipera:
+auth-file: "/var/lib/ntfy/user.db"
+auth-default-access: "deny-all"
+
+cache-file: "/var/lib/ntfy/cache.db"
+attachment-cache-dir: "/var/lib/ntfy/attachments"
+
+# Po instalacji:
+#   ntfy user add --role=admin twoj_user       # konto do apki na iPhonie
+#   ntfy token add twoj_user                   # token Bearer — wklej w GUI snipera
+# W apce ntfy na iOS: Settings → dodaj serwer (base-url) → zaloguj się
+# swoim userem → subskrybuj topic (np. luxmed-a8f3k2).

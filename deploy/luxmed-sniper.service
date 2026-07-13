@@ -1,0 +1,30 @@
+[Unit]
+Description=LuxmedSniper web (FastAPI + scheduler)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sniper
+Group=sniper
+WorkingDirectory=/opt/luxmed-sniper
+Environment=SNIPER_DATA_DIR=/opt/luxmed-sniper/data
+Environment=SNIPER_HOST=0.0.0.0
+Environment=SNIPER_PORT=8080
+# Auto-unlock po restarcie (opcjonalne): plik z master key bind-mountowany
+# z hosta Proxmoxa (patrz deploy/PROXMOX.md). Zakomentuj, jeśli wolisz
+# podawać klucz recznie w GUI po każdym restarcie.
+#Environment=SNIPER_MASTER_KEY_FILE=/mnt/sniper-key/master.key
+ExecStart=/opt/luxmed-sniper/.venv/bin/python -m app
+Restart=always
+RestartSec=5
+
+# hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/luxmed-sniper/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
